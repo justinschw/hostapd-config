@@ -1,0 +1,29 @@
+{
+  "name": "hostapd-config",
+  "version": "1.0.0",
+  "description": "Nodejs wrapper to configure and run hostapd",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/justinschw/hostapd-config.git"
+  },
+  "keywords": [
+    "hostapd",
+    "linux",
+    "networking",
+    "wireless"
+  ],
+  "author": "Justin Schwartzbeck (justinmschw@gmail.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/justinschw/hostapd-config/issues"
+  },
+  "homepage": "https://github.com/justinschw/hostapd-config#readme",
+  "dependencies": {
+    "joi": "17.4.2",
+    "uuid": "8.3.2"
+  }
+}
