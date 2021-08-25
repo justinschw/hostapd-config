@@ -25,5 +25,10 @@
   "dependencies": {
     "joi": "17.4.2",
     "uuid": "8.3.2"
+  },
+  "devDependencies": {
+    "chai": "4.3.4",
+    "mocha": "9.1.0",
+    "mock-spawn": "0.2.6"
   }
 }
