@@ -17,10 +17,16 @@ const options = {
 
 const hostapd = new Hostapd(options);
 
+// Start independent daemon
 hostapd.start().then(result => {
   console.log(`Hostapd started with code ${result.code}`);
 }).catch(err => {
   console.log(`Hostapd failed to start: ${err.message}`);
+});
+
+// alternatively you can start it as a systemctl service
+hostapd.restart().then(() => {
+  console.log('Service started successfully');
 });
 ```
 
@@ -38,6 +44,6 @@ hostapd.start().then(result => {
 |wpaPairwise|String|**wpa_pairwise** option in hostapd|TKIP CCMP|default|
 |wpaPtkRekey|Integer|**wpa_ptk_rekey** option in hostapd|600|default|
 |pidFile|String|Path to pid file|/tmp/{uuidv4}.conf|default|
-|configFilePath|String|Path to hostapd config file|/tmp/hostapd-{uuidv4}.conf|default|
+|configFilePath|String|Path to hostapd config file|/etc/hostapd/hostapd.conf|default|
 
 For more info on **bolded** options, see the hostapd man page.

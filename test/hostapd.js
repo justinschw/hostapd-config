@@ -2,14 +2,20 @@
 const mockSpawn = require('mock-spawn');
 const mySpawn = mockSpawn();
 require('child_process').spawn = mySpawn;
+const sandbox = require('sinon').createSandbox();
+process.env.TESTENV = true;
 const Hostapd = require('../lib/hostapd');
 const expect = require('chai').expect;
 const assert = require('chai').assert;
+const systemctl = require('systemctl');
 const fs = require('fs');
+const memfs = require('memfs');
 
 const configFiles = {
     default: fs.readFileSync(`${__dirname}/data/configFileDefault`, 'utf8')
 }
+
+memfs.mkdirSync('/etc/hostapd', {recursive: true});
 
 async function expectError(fn) {
     let error = null;
@@ -133,4 +139,23 @@ describe('/lib/hostapd', function() {
             });
         });
     }); // end stop
+
+    describe('restart', function() {
+        beforeEach(function() {
+            sandbox.stub(systemctl, 'restart').resolves();
+        });
+
+        afterEach(function() {
+            sandbox.restore()
+        });
+
+        it('valid', async function() {
+            const hostapdServer = new Hostapd({
+                iface: 'wlan0',
+                ssid: 'TellMyWiFiLoveHer',
+                wpaPassphrase: 'supersecretpassword'
+            });
+            await hostapdServer.restart();
+        });
+    });
 });
