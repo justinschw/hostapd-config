@@ -6,7 +6,6 @@ const sandbox = require('sinon').createSandbox();
 process.env.TESTENV = true;
 const Hostapd = require('../lib/hostapd');
 const expect = require('chai').expect;
-const assert = require('chai').assert;
 const systemctl = require('systemctl');
 const fs = require('fs');
 const memfs = require('memfs');
@@ -16,16 +15,6 @@ const configFiles = {
 }
 
 memfs.mkdirSync('/etc/hostapd', {recursive: true});
-
-async function expectError(fn) {
-    let error = null;
-    try {
-        await fn();
-    } catch (err) {
-        error = err;
-    }
-    assert(error !== null);
-}
 
 describe('/lib/hostapd', function() {
     describe('constructor', function() {
@@ -58,7 +47,8 @@ describe('/lib/hostapd', function() {
             const hostapdServer = new Hostapd({
                 iface: 'wlan0',
                 ssid: 'TellMyWiFiLoveHer',
-                wpaPassphrase: 'supersecretpassword'
+                wpaPassphrase: 'supersecretpassword',
+                configFilePath: '/etc/hostapd/hostapd1.conf'
             });
             // Set binary manually
             hostapdServer.binary = '/usr/sbin/hostapd';
@@ -80,7 +70,8 @@ describe('/lib/hostapd', function() {
             const hostapdServer = new Hostapd({
                 iface: 'wlan0',
                 ssid: 'TellMyWiFiLoveHer',
-                wpaPassphrase: 'supersecretpassword'
+                wpaPassphrase: 'supersecretpassword',
+                configFilePath: '/etc/hostapd/hostapd2.conf'
             });
             // No binary set
             hostapdServer.binary = null;
@@ -103,7 +94,8 @@ describe('/lib/hostapd', function() {
             const hostapdServer = new Hostapd({
                 iface: 'wlan0',
                 ssid: 'TellMyWiFiLoveHer',
-                wpaPassphrase: 'supersecretpassword'
+                wpaPassphrase: 'supersecretpassword',
+                configFilePath: '/etc/hostapd/hostapd3.conf'
             });
             hostapdServer.pid = 1234;
             hostapdServer.stop().then(() => {
@@ -118,7 +110,8 @@ describe('/lib/hostapd', function() {
             const hostapdServer = new Hostapd({
                 iface: 'wlan0',
                 ssid: 'TellMyWiFiLoveHer',
-                wpaPassphrase: 'supersecretpassword'
+                wpaPassphrase: 'supersecretpassword',
+                configFilePath: '/etc/hostapd/hostapd4.conf'
             });
             hostapdServer.stop(1234).then(() => {
                 done();
@@ -132,7 +125,8 @@ describe('/lib/hostapd', function() {
             const hostapdServer = new Hostapd({
                 iface: 'wlan0',
                 ssid: 'TellMyWiFiLoveHer',
-                wpaPassphrase: 'supersecretpassword'
+                wpaPassphrase: 'supersecretpassword',
+                configFilePath: '/etc/hostapd/hostapd5.conf'
             });
             hostapdServer.stop().then(() => {
                 done();
@@ -141,21 +135,48 @@ describe('/lib/hostapd', function() {
     }); // end stop
 
     describe('restart', function() {
+
+        let restarts = 0;
+
         beforeEach(function() {
-            sandbox.stub(systemctl, 'restart').resolves();
+            restarts = 0;
+            sandbox.stub(systemctl, 'restart').callsFake(function() {
+                restarts += 1;
+            });
         });
 
         afterEach(function() {
             sandbox.restore()
         });
 
-        it('valid', async function() {
+        it('valid',  function(done) {
             const hostapdServer = new Hostapd({
                 iface: 'wlan0',
                 ssid: 'TellMyWiFiLoveHer',
                 wpaPassphrase: 'supersecretpassword'
             });
-            await hostapdServer.restart();
+            hostapdServer.restart().then(() => {
+                expect(restarts).eql(1);
+                done();
+            });
+            hostapdServer.clearConfig();
+        });
+
+        it('twice',  function(done) {
+            const hostapdServer = new Hostapd({
+                iface: 'wlan0',
+                ssid: 'TellMyWiFiLoveHer',
+                wpaPassphrase: 'supersecretpassword'
+            });
+            hostapdServer.restart().then(() => {
+                expect(restarts).eql(1);
+
+                // Do it again with the same config; this time it shouldn't restart
+                hostapdServer.restart().then(() => {
+                    expect(restarts).eql(1);
+                    done();
+                })
+            });
         });
     });
 });
