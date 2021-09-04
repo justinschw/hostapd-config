@@ -168,11 +168,11 @@ describe('/lib/hostapd', function() {
                 ssid: 'TellMyWiFiLoveHer',
                 wpaPassphrase: 'supersecretpassword'
             });
-            hostapdServer.restart().then(() => {
+            hostapdServer.restart(false).then(() => {
                 expect(restarts).eql(1);
 
                 // Do it again with the same config; this time it shouldn't restart
-                hostapdServer.restart().then(() => {
+                hostapdServer.restart(false).then(() => {
                     expect(restarts).eql(1);
                     done();
                 })
