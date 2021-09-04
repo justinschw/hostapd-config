@@ -1,6 +1,6 @@
 {
   "name": "hostapd-config",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Nodejs wrapper to configure and run hostapd",
   "main": "index.js",
   "scripts": {
